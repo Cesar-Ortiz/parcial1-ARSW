@@ -13,7 +13,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import edu.eci.arsw.moneylaundering.TransactionThread;
 
 /**
  * A Camel Application
@@ -25,6 +24,8 @@ public class CovidAnalyzerTool {
     private int amountOfFilesTotal;
     private AtomicInteger amountOfFilesProcessed;
     ArrayList<Hilo> hilos= new ArrayList<Hilo>();
+    private int inferior;
+	private int superior;
 
     public CovidAnalyzerTool() {
         resultAnalyzer = new ResultAnalyzer();
@@ -33,29 +34,29 @@ public class CovidAnalyzerTool {
     }
 
     public void processResultData() {
+
         amountOfFilesProcessed.set(0);
         List<File> resultFiles = getResultFileList();
         amountOfFilesTotal = resultFiles.size();
         for (int i = 0; i < 5; i++) {
-			inicioNumero = amountOfFilesTotal / 5 * i;
-			if (i == 5 - 1 ) {
-				finNumero = amountOfFilesTotal;
+			inferior = amountOfFilesTotal / 5*i;
+			if (5-1==i ) {
+				superior = amountOfFilesTotal-1;
 			}else {
-				finNumero = (amountOfFilesTotal / 5 * (i + 1)) - 1;
+				superior = (amountOfFilesTotal/5*(i+1))-1;
 			}
-			Hilo hilo=new Hilo(resultFiles.subList(inicioNumero, finNumero), amountOfFilesProcessed, resultAnalyzer, testReader);
+			Hilo hilo=new Hilo(resultFiles.subList(inferior, superior), amountOfFilesProcessed, resultAnalyzer, testReader);
 			hilo.start();
 			hilos.add(hilo);
 		}
-        
-        
-        for (File resultFile : resultFiles) {
+                
+        /*for (File resultFile : resultFiles) {
             List<Result> results = testReader.readResultsFromFile(resultFile);
             for (Result result : results) {
                 resultAnalyzer.addResult(result);
             }
             amountOfFilesProcessed.incrementAndGet();
-        }
+        }*/
     }
 
     private List<File> getResultFileList() {
@@ -78,6 +79,8 @@ public class CovidAnalyzerTool {
      */
     public static void main(String... args) throws Exception {
         CovidAnalyzerTool covidAnalyzerTool = new CovidAnalyzerTool();
+        //Thread processingThread = new Thread(() -> covidAnalyzerTool.processResultData());
+        //processingThread.start();
         covidAnalyzerTool.processResultData();
         while (true) {
             Scanner scanner = new Scanner(System.in);
