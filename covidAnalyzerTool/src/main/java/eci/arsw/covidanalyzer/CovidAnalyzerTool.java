@@ -87,7 +87,7 @@ public class CovidAnalyzerTool {
             else if(line.contains("")) {
             	for (Hilo hilo : covidAnalyzerTool.hilos){
             		if (hilo.estaDetenido()) {
-            			System.out.println("-----------Hilos corriendo-----------");
+            			System.out.println("reanudado");
             			synchronized(hilo) {
             				hilo.notify();
             			} 
@@ -95,7 +95,6 @@ public class CovidAnalyzerTool {
             		}
             		else {
             			hilo.setDetener(true);
-            			System.out.println("-----------Hilos pausados------------");
             			String message = "Processed %d out of %d files.\nFound %d positive people:\n%s";
                         Set<Result> positivePeople = covidAnalyzerTool.getPositivePeople();
                         String affectedPeople = positivePeople.stream().map(Result::toString).reduce("", (s1, s2) -> s1 + "\n" + s2);
