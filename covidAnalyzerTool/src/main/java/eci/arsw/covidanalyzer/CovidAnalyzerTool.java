@@ -24,8 +24,6 @@ public class CovidAnalyzerTool {
     private int amountOfFilesTotal;
     private AtomicInteger amountOfFilesProcessed;
     ArrayList<Hilo> hilos= new ArrayList<Hilo>();
-    private int inferior;
-	private int superior;
 
     public CovidAnalyzerTool() {
         resultAnalyzer = new ResultAnalyzer();
@@ -38,14 +36,13 @@ public class CovidAnalyzerTool {
         amountOfFilesProcessed.set(0);
         List<File> resultFiles = getResultFileList();
         amountOfFilesTotal = resultFiles.size();
+        Hilo hilo;
         for (int i = 0; i < 5; i++) {
-			inferior = amountOfFilesTotal / 5*i;
 			if (5-1==i ) {
-				superior = amountOfFilesTotal-1;
+				hilo=new Hilo(resultFiles.subList(amountOfFilesTotal / 5*i, amountOfFilesTotal-1), testReader, resultAnalyzer, amountOfFilesProcessed);
 			}else {
-				superior = (amountOfFilesTotal/5*(i+1))-1;
+				hilo=new Hilo(resultFiles.subList(amountOfFilesTotal / 5*i, (amountOfFilesTotal/5*(i+1))-1), testReader, resultAnalyzer, amountOfFilesProcessed);
 			}
-			Hilo hilo=new Hilo(resultFiles.subList(inferior, superior), amountOfFilesProcessed, resultAnalyzer, testReader);
 			hilo.start();
 			hilos.add(hilo);
 		}
@@ -87,11 +84,26 @@ public class CovidAnalyzerTool {
             String line = scanner.nextLine();
             if (line.contains("exit"))
                 break;
-            String message = "Processed %d out of %d files.\nFound %d positive people:\n%s";
-            Set<Result> positivePeople = covidAnalyzerTool.getPositivePeople();
-            String affectedPeople = positivePeople.stream().map(Result::toString).reduce("", (s1, s2) -> s1 + "\n" + s2);
-            message = String.format(message, covidAnalyzerTool.amountOfFilesProcessed.get(), covidAnalyzerTool.amountOfFilesTotal, positivePeople.size(), affectedPeople);
-            System.out.println(message);
+            else if(line.contains("")) {
+            	for (Hilo hilo : covidAnalyzerTool.hilos){
+            		if (hilo.estaDetenido()) {
+            			System.out.println("-----------Hilos corriendo-----------");
+            			synchronized(hilo) {
+            				hilo.notify();
+            			} 
+            			hilo.setDetener(false);
+            		}
+            		else {
+            			hilo.setDetener(true);
+            			System.out.println("-----------Hilos pausados------------");
+            			String message = "Processed %d out of %d files.\nFound %d positive people:\n%s";
+                        Set<Result> positivePeople = covidAnalyzerTool.getPositivePeople();
+                        String affectedPeople = positivePeople.stream().map(Result::toString).reduce("", (s1, s2) -> s1 + "\n" + s2);
+                        message = String.format(message, covidAnalyzerTool.amountOfFilesProcessed.get(), covidAnalyzerTool.amountOfFilesTotal, positivePeople.size(), affectedPeople);
+                        System.out.println(message);
+            		}
+				}
+            }
         }
     }
 

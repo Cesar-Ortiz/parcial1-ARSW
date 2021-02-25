@@ -9,8 +9,9 @@ public class Hilo extends Thread{
 	private AtomicInteger amountOfFilesProcessed;
 	private ResultAnalyzer resultAnalyzer;
 	private TestReader testReader;
+	private boolean parar;
 	
-	public Hilo(List<File> resultFiles, AtomicInteger amountOfFilesProcessed, ResultAnalyzer resultAnalyzer, TestReader testReader) {
+	public Hilo(List<File> resultFiles, TestReader testReader,ResultAnalyzer resultAnalyzer, AtomicInteger amountOfFilesProcessed) {
 		this.resultFiles=resultFiles;
 		this.amountOfFilesProcessed=amountOfFilesProcessed;
 		this.resultAnalyzer=resultAnalyzer;
@@ -25,5 +26,13 @@ public class Hilo extends Thread{
             }
             amountOfFilesProcessed.incrementAndGet();
         }
+	}
+	
+	public boolean estaDetenido() {
+		return parar;
+	}
+
+	public void setDetener(boolean enPausa) {
+		this.parar = enPausa;
 	}
 }
